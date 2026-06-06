@@ -6,6 +6,7 @@ import com.diazmoviles.app.data.remote.api.LoginRequest
 import com.diazmoviles.app.domain.model.AuthTokens
 import com.diazmoviles.app.domain.model.LoggedUser
 import com.diazmoviles.app.domain.repository.AuthRepository
+import org.json.JSONObject
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
@@ -26,9 +27,19 @@ class AuthRepositoryImpl @Inject constructor(
 
                 Pair(tokens, user)
             } else {
-                val error = when (response.code()) {
-                    401 -> "Credenciales inválidas"
-                    else -> "Error del servidor: ${response.code()}"
+                val errorBody = response.errorBody()?.string()
+                val error = if (errorBody != null) {
+                    try {
+                        val json = JSONObject(errorBody)
+                        json.optString("detail", json.optString("message", "Credenciales inválidas"))
+                    } catch (_: Exception) {
+                        "Credenciales inválidas"
+                    }
+                } else {
+                    when (response.code()) {
+                        401 -> "Credenciales inválidas"
+                        else -> "Error del servidor: ${response.code()}"
+                    }
                 }
                 throw Exception(error)
             }
