@@ -30,6 +30,24 @@ class TokenDataStore @Inject constructor(
         private val KEY_IS_STAFF = booleanPreferencesKey("is_staff")
     }
 
+    private fun cartKey(userId: Int) = stringPreferencesKey("cart_items_$userId")
+
+    suspend fun saveCartItems(userId: Int, json: String) {
+        context.dataStore.edit { prefs ->
+            prefs[cartKey(userId)] = json
+        }
+    }
+
+    suspend fun loadCartItems(userId: Int): String? {
+        return context.dataStore.data.first()[cartKey(userId)]
+    }
+
+    suspend fun clearCartItems(userId: Int) {
+        context.dataStore.edit { prefs ->
+            prefs.remove(cartKey(userId))
+        }
+    }
+
     val isLoggedIn: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[KEY_ACCESS] != null
     }

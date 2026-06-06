@@ -60,7 +60,7 @@ class AuthViewModel @Inject constructor(
             val result = authRepository.login(username, password)
             result.fold(
                 onSuccess = { (_, user) ->
-                    cartRepository.clear()
+                    cartRepository.loadForUser(user.userId)
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         isLoggedIn = true,
@@ -82,6 +82,7 @@ class AuthViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
+            cartRepository.persist()
             cartRepository.clear()
             authRepository.logout()
             _uiState.value = AuthUiState()

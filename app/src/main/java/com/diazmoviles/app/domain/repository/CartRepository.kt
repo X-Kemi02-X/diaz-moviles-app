@@ -11,4 +11,6 @@ interface CartRepository {
     fun removeItem(productoId: Int)
     fun updateQuantity(productoId: Int, cantidad: Int)
     fun clear()
+    suspend fun loadForUser(userId: Int)
+    suspend fun persist()
 }
