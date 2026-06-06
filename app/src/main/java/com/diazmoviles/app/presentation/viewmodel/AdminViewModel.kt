@@ -10,8 +10,10 @@ import com.diazmoviles.app.data.remote.dto.CategoriaDto
 import com.diazmoviles.app.data.remote.dto.MarcaDto
 import com.diazmoviles.app.domain.model.Cliente
 import com.diazmoviles.app.domain.model.Producto
+import com.diazmoviles.app.domain.model.Venta
 import com.diazmoviles.app.domain.repository.ClienteRepository
 import com.diazmoviles.app.domain.repository.ProductoRepository
+import com.diazmoviles.app.domain.repository.VentaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,6 +35,9 @@ data class AdminUiState(
     val isLoadingClientes: Boolean = false,
     val clientes: List<Cliente> = emptyList(),
     val searchClientes: String = "",
+    val isLoadingVentas: Boolean = false,
+    val ventas: List<Venta> = emptyList(),
+    val searchVentas: String = "",
     val error: String? = null
 )
 
@@ -41,7 +46,8 @@ class AdminViewModel @Inject constructor(
     private val productoRepository: ProductoRepository,
     private val marcaApi: MarcaApi,
     private val categoriaApi: CategoriaApi,
-    private val clienteRepository: ClienteRepository
+    private val clienteRepository: ClienteRepository,
+    private val ventaRepository: VentaRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AdminUiState())
@@ -56,6 +62,7 @@ class AdminViewModel @Inject constructor(
         cargarMarcas()
         cargarCategorias()
         cargarClientes()
+        cargarVentas()
     }
 
     // ── Productos ──
@@ -173,6 +180,37 @@ class AdminViewModel @Inject constructor(
     }
 
     fun buscarClientes(q: String) { _uiState.value = _uiState.value.copy(searchClientes = q) }
+
+    // ── Ventas ──
+    fun cargarVentas() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoadingVentas = true)
+            ventaRepository.listarVentas().fold(
+                onSuccess = { items -> _uiState.value = _uiState.value.copy(ventas = items, isLoadingVentas = false) },
+                onFailure = { e -> _uiState.value = _uiState.value.copy(error = e.message, isLoadingVentas = false) }
+            )
+        }
+    }
+
+    fun actualizarEstadoVenta(id: Int, estado: String) {
+        viewModelScope.launch {
+            ventaRepository.actualizarEstadoVenta(id, estado).fold(
+                onSuccess = { cargarVentas() },
+                onFailure = { e -> _uiState.value = _uiState.value.copy(error = e.message) }
+            )
+        }
+    }
+
+    fun eliminarVenta(id: Int) {
+        viewModelScope.launch {
+            ventaRepository.eliminarVenta(id).fold(
+                onSuccess = { cargarVentas() },
+                onFailure = { e -> _uiState.value = _uiState.value.copy(error = e.message) }
+            )
+        }
+    }
+
+    fun buscarVentas(q: String) { _uiState.value = _uiState.value.copy(searchVentas = q) }
 
     fun clearError() { _uiState.value = _uiState.value.copy(error = null) }
 }

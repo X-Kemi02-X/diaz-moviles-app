@@ -4,6 +4,7 @@ import com.diazmoviles.app.data.remote.api.VentaApi
 import com.diazmoviles.app.data.remote.dto.CreateDetalleVentaRequest
 import com.diazmoviles.app.data.remote.dto.CreateVentaRequest
 import com.diazmoviles.app.data.remote.dto.DetalleVentaDto
+import com.diazmoviles.app.data.remote.dto.UpdateVentaEstadoRequest
 import com.diazmoviles.app.data.remote.dto.VentaDto
 import com.diazmoviles.app.domain.model.DetalleVenta
 import com.diazmoviles.app.domain.model.Venta
@@ -60,6 +61,18 @@ class VentaRepositoryImpl @Inject constructor(
                 response.body()!!.toDomain()
             } else {
                 throw Exception("Error al obtener venta: ${response.code()}")
+            }
+        }
+    }
+
+    override suspend fun actualizarEstadoVenta(id: Int, estado: String): Result<Venta> {
+        return runCatching {
+            val response = ventaApi.actualizarEstadoVenta(id, UpdateVentaEstadoRequest(estado))
+            if (response.isSuccessful) {
+                response.body()!!.toDomain()
+            } else {
+                val err = response.errorBody()?.string() ?: response.code().toString()
+                throw Exception("Error al actualizar venta: $err")
             }
         }
     }

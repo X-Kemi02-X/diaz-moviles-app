@@ -23,6 +23,10 @@ data class CreateVentaRequest(
     val observacion: String = ""
 )
 
+data class UpdateVentaEstadoRequest(
+    val estado: String
+)
+
 data class CreateDetalleVentaRequest(
     val venta: Int,
     val producto: Int,

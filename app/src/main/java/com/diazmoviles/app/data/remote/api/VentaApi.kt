@@ -4,11 +4,13 @@ import com.diazmoviles.app.data.remote.dto.CreateDetalleVentaRequest
 import com.diazmoviles.app.data.remote.dto.CreateVentaRequest
 import com.diazmoviles.app.data.remote.dto.DetalleVentaDto
 import com.diazmoviles.app.data.remote.dto.PaginatedDto
+import com.diazmoviles.app.data.remote.dto.UpdateVentaEstadoRequest
 import com.diazmoviles.app.data.remote.dto.VentaDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -33,6 +35,12 @@ interface VentaApi {
     suspend fun actualizarVenta(
         @Path("id") id: Int,
         @Body request: CreateVentaRequest
+    ): Response<VentaDto>
+
+    @PATCH("ventas/{id}/")
+    suspend fun actualizarEstadoVenta(
+        @Path("id") id: Int,
+        @Body request: UpdateVentaEstadoRequest
     ): Response<VentaDto>
 
     @DELETE("ventas/{id}/")

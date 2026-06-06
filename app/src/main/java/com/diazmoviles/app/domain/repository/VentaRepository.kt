@@ -15,5 +15,7 @@ interface VentaRepository {
 
     suspend fun obtenerVenta(id: Int): Result<Venta>
 
+    suspend fun actualizarEstadoVenta(id: Int, estado: String): Result<Venta>
+
     suspend fun eliminarVenta(id: Int): Result<Unit>
 }

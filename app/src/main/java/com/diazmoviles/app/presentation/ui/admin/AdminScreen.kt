@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.diazmoviles.app.data.remote.dto.CategoriaDto
 import com.diazmoviles.app.data.remote.dto.MarcaDto
 import com.diazmoviles.app.domain.model.Cliente
+import com.diazmoviles.app.domain.model.Venta
 import com.diazmoviles.app.presentation.viewmodel.AdminUiState
 import com.diazmoviles.app.presentation.viewmodel.AdminViewModel
 
@@ -67,6 +69,7 @@ fun AdminScreen(
                             "marca" -> viewModel.eliminarMarca(deleteId!!)
                             "categoria" -> viewModel.eliminarCategoria(deleteId!!)
                             "cliente" -> viewModel.eliminarCliente(deleteId!!)
+                            "venta" -> viewModel.eliminarVenta(deleteId!!)
                         }
                         deleteId = null
                     },
@@ -104,6 +107,7 @@ fun AdminScreen(
                     Triple(Icons.Default.Bookmark, "Marcas", uiState.marcas.size.toString()),
                     Triple(Icons.Default.Bookmarks, "Categorías", uiState.categorias.size.toString()),
                     Triple(Icons.Default.People, "Clientes", uiState.clientes.size.toString()),
+                    Triple(Icons.Default.ShoppingCart, "Ventas", uiState.ventas.size.toString()),
                 ).forEach { (icon, label, count) ->
                     Card(
                         modifier = Modifier.weight(1f),
@@ -120,7 +124,7 @@ fun AdminScreen(
             }
 
             // Tabs
-            val tabs = listOf("Productos", "Marcas", "Categorías", "Clientes")
+            val tabs = listOf("Productos", "Marcas", "Categorías", "Clientes", "Ventas")
             TabRow(
                 selectedTabIndex = uiState.selectedTab,
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -140,6 +144,7 @@ fun AdminScreen(
                 1 -> MarcasTab(uiState, viewModel, { deleteId = it; deleteType = "marca" })
                 2 -> CategoriasTab(uiState, viewModel, { deleteId = it; deleteType = "categoria" })
                 3 -> ClientesTab(uiState, viewModel, { deleteId = it; deleteType = "cliente" })
+                4 -> VentasTab(uiState, viewModel, { deleteId = it; deleteType = "venta" })
             }
         }
     }
@@ -418,6 +423,102 @@ private fun ClientesTab(
                                     Text("${c.cedula} · ${c.email} · ${c.telefono}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 IconButton(onClick = { onDeleteRequest(c.id) }, Modifier.size(30.dp)) {
+                                    Icon(Icons.Default.Delete, "Eliminar", Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
+                                }
+                            }
+                        }
+                    }
+                }
+                item { Spacer(Modifier.height(16.dp)) }
+            }
+        }
+    }
+}
+
+// ── Tab Ventas ──
+@Composable
+private fun VentasTab(
+    uiState: AdminUiState, vm: AdminViewModel,
+    onDeleteRequest: (Int) -> Unit
+) {
+    var expandId by remember { mutableStateOf<Int?>(null) }
+
+    Column(Modifier.fillMaxSize()) {
+        OutlinedTextField(
+            value = uiState.searchVentas,
+            onValueChange = { vm.buscarVentas(it) },
+            placeholder = { Text("Buscar ventas...") },
+            leadingIcon = { Icon(Icons.Default.Search, null) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            shape = RoundedCornerShape(12.dp)
+        )
+        if (uiState.isLoadingVentas) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+        } else if (uiState.ventas.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("No hay ventas", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        } else {
+            val filtered = if (uiState.searchVentas.isBlank()) uiState.ventas
+                else uiState.ventas.filter { it.id.toString() == uiState.searchVentas.trim() }
+            LazyColumn(contentPadding = PaddingValues(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                items(filtered, key = { "v_${it.id}" }) { venta ->
+                    Card(
+                        onClick = { expandId = if (expandId == venta.id) null else venta.id },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        elevation = CardDefaults.cardElevation(1.dp)
+                    ) {
+                        Column(Modifier.fillMaxWidth().padding(12.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                                Column(Modifier.weight(1f)) {
+                                    Text("Venta #${venta.id}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                                    Text(venta.clienteNombre ?: "N/A", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                Text(
+                                    venta.estado.replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = when (venta.estado) {
+                                        "completada" -> MaterialTheme.colorScheme.primary
+                                        "cancelada", "anulada" -> MaterialTheme.colorScheme.error
+                                        else -> MaterialTheme.colorScheme.tertiary
+                                    }
+                                )
+                            }
+                            Text("$${venta.total} · ${venta.fecha.take(10)} · ${venta.metodoPago}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            if (venta.detalles.isNotEmpty()) {
+                                Spacer(Modifier.height(4.dp))
+                                venta.detalles.forEach { d ->
+                                    Text("• ${d.productoNombre} x${d.cantidad} = $${d.subtotal}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                            if (expandId == venta.id) {
+                                Spacer(Modifier.height(8.dp))
+                                Divider()
+                                Spacer(Modifier.height(8.dp))
+                                if (venta.estado == "pendiente") {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                                        Button(
+                                            onClick = { vm.actualizarEstadoVenta(venta.id, "completada") },
+                                            modifier = Modifier.weight(1f),
+                                            shape = RoundedCornerShape(10.dp)
+                                        ) { Text("Confirmar") }
+                                        OutlinedButton(
+                                            onClick = { vm.actualizarEstadoVenta(venta.id, "cancelada") },
+                                            modifier = Modifier.weight(1f),
+                                            shape = RoundedCornerShape(10.dp),
+                                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                                        ) { Text("Cancelar") }
+                                    }
+                                } else if (venta.estado == "completada") {
+                                    Button(
+                                        onClick = { vm.actualizarEstadoVenta(venta.id, "anulada") },
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                                    ) { Text("Anular venta") }
+                                }
+                                Spacer(Modifier.height(8.dp))
+                                IconButton(onClick = { onDeleteRequest(venta.id) }, modifier = Modifier.size(30.dp)) {
                                     Icon(Icons.Default.Delete, "Eliminar", Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
                                 }
                             }
