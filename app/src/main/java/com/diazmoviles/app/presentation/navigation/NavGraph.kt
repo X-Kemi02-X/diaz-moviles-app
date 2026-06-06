@@ -1,6 +1,7 @@
 package com.diazmoviles.app.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -9,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.diazmoviles.app.presentation.viewmodel.AdminViewModel
 import com.diazmoviles.app.presentation.ui.admin.AdminProductFormScreen
 import com.diazmoviles.app.presentation.ui.admin.AdminScreen
 import com.diazmoviles.app.presentation.ui.auth.LoginScreen
@@ -27,7 +29,10 @@ import com.diazmoviles.app.presentation.viewmodel.AuthViewModel
 sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Home : Screen("home")
-    data object Productos : Screen("productos")
+    data object Productos : Screen("productos?categoriaId={categoriaId}") {
+        fun createRoute(categoriaId: Int? = null) =
+            if (categoriaId != null) "productos?categoriaId=$categoriaId" else "productos"
+    }
     data object DetalleProducto : Screen("detalle/{productoId}") {
         fun createRoute(productoId: Int) = "detalle/$productoId"
     }
@@ -71,7 +76,8 @@ fun NavGraph() {
         }
         composable(Screen.Home.route) {
             HomeScreen(
-                onNavigateToProductos = { navController.navigate(Screen.Productos.route) },
+                onNavigateToProductos = { navController.navigate(Screen.Productos.createRoute()) },
+                onNavigateToCategoria = { catId -> navController.navigate(Screen.Productos.createRoute(catId)) },
                 onNavigateToCart = { navController.navigate(Screen.Cart.route) },
                 onNavigateToOrders = { navController.navigate(Screen.Orders.route) },
                 onNavigateToRegister = { navController.navigate(Screen.Register.route) },
@@ -85,8 +91,16 @@ fun NavGraph() {
                 isStaff = authState.isStaff
             )
         }
-        composable(Screen.Productos.route) {
+        composable(
+            route = Screen.Productos.route,
+            arguments = listOf(navArgument("categoriaId") {
+                type = NavType.IntType
+                defaultValue = -1
+            })
+        ) { backStackEntry ->
+            val categoriaId = backStackEntry.arguments?.getInt("categoriaId")
             ProductosScreen(
+                categoriaId = if (categoriaId == -1) null else categoriaId,
                 onProductClick = { productoId ->
                     navController.navigate(Screen.DetalleProducto.createRoute(productoId))
                 }
@@ -139,18 +153,32 @@ fun NavGraph() {
         composable(Screen.EditProfile.route) {
             EditProfileScreen(onBack = { navController.popBackStack() })
         }
-        composable(Screen.Admin.route) {
+        composable(Screen.Admin.route) { backStackEntry ->
+            val adminViewModel: AdminViewModel = hiltViewModel()
+            val savedStateHandle = backStackEntry.savedStateHandle
+            LaunchedEffect(savedStateHandle.get<Boolean>("refrescarAdmin")) {
+                if (savedStateHandle.get<Boolean>("refrescarAdmin") == true) {
+                    adminViewModel.cargarProductos()
+                    savedStateHandle.set("refrescarAdmin", false)
+                }
+            }
             AdminScreen(
                 onBack = { navController.popBackStack() },
                 onAddProduct = { navController.navigate(Screen.AdminProductForm.createRoute(null)) },
-                onEditProduct = { productoId -> navController.navigate(Screen.AdminProductForm.createRoute(productoId)) }
+                onEditProduct = { productoId -> navController.navigate(Screen.AdminProductForm.createRoute(productoId)) },
+                viewModel = adminViewModel
             )
         }
         composable(
             route = Screen.AdminProductForm.route,
             arguments = listOf(navArgument("productoId") { type = NavType.IntType })
         ) {
-            AdminProductFormScreen(onBack = { navController.popBackStack() })
+            AdminProductFormScreen(
+                onBack = {
+                    navController.previousBackStackEntry?.savedStateHandle?.set("refrescarAdmin", true)
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

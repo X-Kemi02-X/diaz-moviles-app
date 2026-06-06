@@ -11,7 +11,12 @@ data class ProductosPageResult(
 )
 
 interface ProductoRepository {
-    suspend fun listarProductos(search: String? = null, page: Int? = null): Result<ProductosPageResult>
+    suspend fun listarProductos(
+        search: String? = null,
+        categoria: Int? = null,
+        marca: Int? = null,
+        page: Int? = null
+    ): Result<ProductosPageResult>
     suspend fun obtenerProducto(id: Int): Result<Producto>
     suspend fun crearProducto(
         nombre: String, marca: Int, categoria: Int, modelo: String,

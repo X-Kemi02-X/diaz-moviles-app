@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,7 +32,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.diazmoviles.app.data.remote.dto.CategoriaDto
 import com.diazmoviles.app.data.remote.dto.MarcaDto
 import com.diazmoviles.app.domain.model.Cliente
@@ -45,7 +45,7 @@ fun AdminScreen(
     onBack: () -> Unit,
     onAddProduct: () -> Unit,
     onEditProduct: (Int) -> Unit,
-    viewModel: AdminViewModel = hiltViewModel()
+    viewModel: AdminViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbar = remember { SnackbarHostState() }
@@ -175,7 +175,10 @@ private fun ProductosTab(
                     Text("No hay productos", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
-                LazyColumn(contentPadding = PaddingValues(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                LazyColumn(
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     items(uiState.productos, key = { "p_${it.id}" }) { p ->
                         Card(
                             onClick = { onEditProduct(p.id) },
@@ -196,6 +199,29 @@ private fun ProductosTab(
                                     Icon(Icons.Default.Delete, "Eliminar", Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
                                 }
                             }
+                        }
+                    }
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedButton(
+                                onClick = { vm.irPaginaAnterior() },
+                                enabled = uiState.currentPage > 1,
+                                shape = RoundedCornerShape(10.dp)
+                            ) { Text("← Anterior") }
+                            Text(
+                                "Pág. ${uiState.currentPage}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            OutlinedButton(
+                                onClick = { vm.irPaginaSiguiente() },
+                                enabled = uiState.hasMorePages,
+                                shape = RoundedCornerShape(10.dp)
+                            ) { Text("Siguiente →") }
                         }
                     }
                     item { Spacer(Modifier.height(72.dp)) }

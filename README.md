@@ -68,7 +68,7 @@ app/
 │   ├── remote/
 │   │   ├── api/        # Interfaces Retrofit (7 APIs)
 │   │   ├── dto/        # Data Transfer Objects
-│   │   └── interceptor/# BearerTokenInterceptor (auto-refresh)
+│   │   └── interceptor/# BearerTokenInterceptor
 │   └── repository/     # Implementaciones repositorio
 ├── domain/
 │   ├── model/          # Modelos de dominio (7 entidades)
@@ -96,9 +96,8 @@ app/
 
 ## 🔑 Autenticación
 
-- Login con JWT → almacena access + refresh tokens en DataStore
+- Login con JWT → almacena token en DataStore
 - Token se envía automáticamente en todas las peticiones (Interceptor)
-- Si el token expira (401), se refresca automáticamente usando el refresh token
 - Logout limpia sesión completamente
 - Admin: acceso al panel de administración
 - Cliente: solo consulta y compra
@@ -114,14 +113,6 @@ app/
 ## 📦 APK
 
 Descargar: `app/build/outputs/apk/debug/app-debug.apk`
-
-## 📸 Capturas de Pantalla
-
-*(Agregar capturas aquí para la entrega)*
-
-## 📹 Video Demostrativo
-
-*(Agregar enlace al video para la entrega)*
 
 ## 🔗 Backend
 

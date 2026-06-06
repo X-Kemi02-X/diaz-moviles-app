@@ -249,10 +249,10 @@ fun EditProfileScreen(
 
                 Button(
                     onClick = {
-                        viewModel.guardarCliente(cliente.id, nombre, apellido, cedula, email, telefono, direccion)
-                        if (showPasswordSection && oldPassword.isNotBlank() && newPassword.isNotBlank()) {
-                            viewModel.cambiarPassword(oldPassword, newPassword)
-                        }
+                        viewModel.guardarTodo(
+                            cliente.id, nombre, apellido, cedula, email, telefono, direccion,
+                            oldPassword, newPassword
+                        )
                     },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     enabled = nombre.isNotBlank() && apellido.isNotBlank() && email.isNotBlank(),

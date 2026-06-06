@@ -15,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.diazmoviles.app.presentation.viewmodel.CartViewModel
@@ -55,7 +54,7 @@ fun CartScreen(
             if (uiState.items.isNotEmpty()) {
                 Surface(
                     shadowElevation = 8.dp,
-                    tonalElevation = 2.dp
+                    color = MaterialTheme.colorScheme.surface
                 ) {
                     Row(
                         modifier = Modifier
@@ -79,10 +78,17 @@ fun CartScreen(
                         }
                         Button(
                             onClick = { if (isLoggedIn) onCheckout() else onNavigateToLogin() },
-                            shape = RoundedCornerShape(12.dp),
-                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                            shape = RoundedCornerShape(14.dp),
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
                         ) {
-                            Text(if (isLoggedIn) "Pagar ahora" else "Inicia sesión para pagar", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                if (isLoggedIn) "Pagar ahora" else "Inicia sesión",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                     }
                 }
@@ -101,7 +107,7 @@ fun CartScreen(
                         Icons.Default.ShoppingCart,
                         contentDescription = null,
                         modifier = Modifier.size(80.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
                     )
                     Spacer(Modifier.height(16.dp))
                     Text(
@@ -109,6 +115,7 @@ fun CartScreen(
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Spacer(Modifier.height(4.dp))
                     Text(
                         "Agrega productos desde el catálogo",
                         style = MaterialTheme.typography.bodyMedium,
@@ -137,7 +144,8 @@ fun CartScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
                         Row(
                             modifier = Modifier
@@ -159,7 +167,7 @@ fun CartScreen(
                                 Text(
                                     "Subtotal: $${"%.2f".format((item.precio.toDoubleOrNull() ?: 0.0) * item.cantidad)}",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Medium,
+                                    fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -168,13 +176,9 @@ fun CartScreen(
                                 shape = RoundedCornerShape(12.dp),
                                 color = MaterialTheme.colorScheme.surfaceVariant
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     IconButton(
-                                        onClick = {
-                                            viewModel.updateQuantity(item.productoId, item.cantidad - 1)
-                                        },
+                                        onClick = { viewModel.updateQuantity(item.productoId, item.cantidad - 1) },
                                         modifier = Modifier.size(36.dp)
                                     ) {
                                         Icon(
@@ -190,9 +194,7 @@ fun CartScreen(
                                         modifier = Modifier.padding(horizontal = 4.dp)
                                     )
                                     IconButton(
-                                        onClick = {
-                                            viewModel.updateQuantity(item.productoId, item.cantidad + 1)
-                                        },
+                                        onClick = { viewModel.updateQuantity(item.productoId, item.cantidad + 1) },
                                         modifier = Modifier.size(36.dp)
                                     ) {
                                         Icon(
@@ -206,9 +208,7 @@ fun CartScreen(
 
                             Spacer(Modifier.width(8.dp))
 
-                            IconButton(
-                                onClick = { viewModel.removeItem(item.productoId) }
-                            ) {
+                            IconButton(onClick = { viewModel.removeItem(item.productoId) }) {
                                 Icon(
                                     Icons.Default.Delete,
                                     contentDescription = "Eliminar",

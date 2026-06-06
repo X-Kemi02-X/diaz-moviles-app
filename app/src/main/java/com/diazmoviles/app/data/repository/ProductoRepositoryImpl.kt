@@ -20,9 +20,9 @@ class ProductoRepositoryImpl @Inject constructor(
     private val categoriaApi: CategoriaApi
 ) : ProductoRepository {
 
-    override suspend fun listarProductos(search: String?, page: Int?): Result<ProductosPageResult> {
+    override suspend fun listarProductos(search: String?, categoria: Int?, marca: Int?, page: Int?): Result<ProductosPageResult> {
         return runCatching {
-            val response = productoApi.listarProductos(search = search, page = page)
+            val response = productoApi.listarProductos(search = search, marca = marca, categoria = categoria, page = page)
             if (response.isSuccessful) {
                 val body = response.body()!!
                 val nextPage = body.next?.let { url ->

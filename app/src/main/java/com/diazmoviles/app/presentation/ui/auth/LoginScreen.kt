@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.diazmoviles.app.presentation.ui.components.AnimatedGradientBackground
 import com.diazmoviles.app.presentation.viewmodel.AuthViewModel
 import kotlinx.coroutines.delay
 
@@ -70,224 +71,222 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.statusBars)
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Surface(
+        AnimatedGradientBackground(
+            primaryColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.background
+        )
+        Column(
             modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(Modifier.weight(0.8f))
+            Spacer(Modifier.weight(0.6f))
 
-                Box(modifier = Modifier.alpha(logoAlpha)) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PhoneAndroid,
-                                contentDescription = null,
-                                modifier = Modifier.size(48.dp),
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-                        Spacer(Modifier.height(20.dp))
-                        Text(
-                            text = "DIAZ MÓVILES",
-                            style = MaterialTheme.typography.headlineLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 4.sp
-                            ),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = "Tu tienda de confianza",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+            Box(modifier = Modifier.alpha(logoAlpha)) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PhoneAndroid,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
+                    Spacer(Modifier.height(20.dp))
+                    Text(
+                        text = "DIAZ MÓVILES",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 4.sp
+                        ),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Tu tienda de confianza",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
+            }
 
-                Spacer(Modifier.weight(0.3f))
+            Spacer(Modifier.weight(0.3f))
 
-                AnimatedVisibility(
-                    visible = showForm,
-                    enter = fadeIn(animationSpec = tween(600)) +
-                            slideInVertically(animationSpec = tween(600)) { it / 2 }
+            AnimatedVisibility(
+                visible = showForm,
+                enter = fadeIn(animationSpec = tween(600)) +
+                        slideInVertically(animationSpec = tween(600)) { it / 2 }
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
-                    Card(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        elevation = CardDefaults.cardElevation(
-                            defaultElevation = 0.dp
-                        )
+                            .padding(28.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(28.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Iniciar sesión",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface
+                        Text(
+                            text = "Iniciar sesión",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(Modifier.height(28.dp))
+
+                        OutlinedTextField(
+                            value = username,
+                            onValueChange = { username = it },
+                            label = { Text("Usuario") },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                            keyboardActions = KeyboardActions(
+                                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
                             )
-                            Spacer(Modifier.height(28.dp))
+                        )
 
-                            OutlinedTextField(
-                                value = username,
-                                onValueChange = { username = it },
-                                label = { Text("Usuario") },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                                keyboardActions = KeyboardActions(
-                                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                                ),
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(14.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                                )
-                            )
+                        Spacer(Modifier.height(16.dp))
 
-                            Spacer(Modifier.height(16.dp))
-
-                            OutlinedTextField(
-                                value = password,
-                                onValueChange = { password = it },
-                                label = { Text("Contraseña") },
-                                singleLine = true,
-                                visualTransformation = if (passwordVisible) VisualTransformation.None
-                                    else PasswordVisualTransformation(),
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Password,
-                                    imeAction = ImeAction.Done
-                                ),
-                                keyboardActions = KeyboardActions(
-                                    onDone = { focusManager.clearFocus() }
-                                ),
-                                trailingIcon = {
-                                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                        Icon(
-                                            imageVector = if (passwordVisible) Icons.Default.VisibilityOff
-                                                else Icons.Default.Visibility,
-                                            contentDescription = if (passwordVisible) "Ocultar" else "Mostrar"
-                                        )
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(14.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                                )
-                            )
-
-                            uiState.error?.let { error ->
-                                Spacer(Modifier.height(16.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = MaterialTheme.colorScheme.errorContainer
-                                ) {
-                                    Text(
-                                        text = error,
-                                        color = MaterialTheme.colorScheme.onErrorContainer,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        modifier = Modifier.padding(12.dp),
-                                        textAlign = TextAlign.Center
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = { Text("Contraseña") },
+                            singleLine = true,
+                            visualTransformation = if (passwordVisible) VisualTransformation.None
+                                else PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = { focusManager.clearFocus() }
+                            ),
+                            trailingIcon = {
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(
+                                        imageVector = if (passwordVisible) Icons.Default.VisibilityOff
+                                            else Icons.Default.Visibility,
+                                        contentDescription = if (passwordVisible) "Ocultar" else "Mostrar"
                                     )
                                 }
-                            }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                            )
+                        )
 
-                            Spacer(Modifier.height(24.dp))
-
-                            AnimatedVisibility(
-                                visible = showButton,
-                                enter = fadeIn(animationSpec = tween(400))
+                        uiState.error?.let { error ->
+                            Spacer(Modifier.height(16.dp))
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.errorContainer
                             ) {
-                                Column {
-                                    Button(
-                                        onClick = {
-                                            focusManager.clearFocus()
-                                            viewModel.login(username, password)
-                                        },
-                                        enabled = !uiState.isLoading &&
-                                                username.isNotBlank() &&
-                                                password.isNotBlank(),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(52.dp),
-                                        shape = RoundedCornerShape(14.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.primary,
-                                            contentColor = MaterialTheme.colorScheme.onPrimary
-                                        ),
-                                        elevation = ButtonDefaults.buttonElevation(
-                                            defaultElevation = 4.dp
+                                Text(
+                                    text = error,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(12.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+
+                        Spacer(Modifier.height(24.dp))
+
+                        AnimatedVisibility(
+                            visible = showButton,
+                            enter = fadeIn(animationSpec = tween(400))
+                        ) {
+                            Column {
+                                Button(
+                                    onClick = {
+                                        focusManager.clearFocus()
+                                        viewModel.login(username, password)
+                                    },
+                                    enabled = !uiState.isLoading &&
+                                            username.isNotBlank() &&
+                                            password.isNotBlank(),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(52.dp),
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    ),
+                                    elevation = ButtonDefaults.buttonElevation(
+                                        defaultElevation = 4.dp
+                                    )
+                                ) {
+                                    if (uiState.isLoading) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(24.dp),
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            strokeWidth = 2.dp
                                         )
-                                    ) {
-                                        if (uiState.isLoading) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(24.dp),
-                                                color = MaterialTheme.colorScheme.onPrimary,
-                                                strokeWidth = 2.dp
+                                    } else {
+                                        Text(
+                                            "INGRESAR",
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 2.sp
                                             )
-                                        } else {
-                                            Text(
-                                                "INGRESAR",
-                                                style = MaterialTheme.typography.titleMedium.copy(
-                                                    fontWeight = FontWeight.Bold,
-                                                    letterSpacing = 2.sp
-                                                )
-                                            )
-                                        }
+                                        )
                                     }
+                                }
 
-                                    Spacer(Modifier.height(12.dp))
+                                Spacer(Modifier.height(12.dp))
 
-                                    OutlinedButton(
-                                        onClick = onEnterAsGuest,
-                                        modifier = Modifier.fillMaxWidth().height(48.dp),
-                                        shape = RoundedCornerShape(14.dp)
-                                    ) {
-                                        Text("Entrar como invitado", style = MaterialTheme.typography.titleMedium)
-                                    }
+                                OutlinedButton(
+                                    onClick = onEnterAsGuest,
+                                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                                    shape = RoundedCornerShape(14.dp)
+                                ) {
+                                    Text("Entrar como invitado", style = MaterialTheme.typography.titleMedium)
+                                }
 
-                                    Spacer(Modifier.height(16.dp))
+                                Spacer(Modifier.height(16.dp))
 
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Text("¿No tienes cuenta? ", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        TextButton(onClick = onNavigateToRegister) {
-                                            Text("Regístrate", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                                        }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Text("¿No tienes cuenta? ", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    TextButton(onClick = onNavigateToRegister) {
+                                        Text("Regístrate", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
                         }
                     }
                 }
-
-                Spacer(Modifier.weight(1f))
             }
+
+            Spacer(Modifier.weight(1f))
         }
     }
 }

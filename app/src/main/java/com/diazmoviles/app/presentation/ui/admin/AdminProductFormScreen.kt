@@ -26,29 +26,17 @@ fun AdminProductFormScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    var nombre by remember { mutableStateOf(uiState.producto?.nombre ?: "") }
-    var marcaId by remember { mutableStateOf(0) }
-    var categoriaId by remember { mutableStateOf(0) }
-    var modelo by remember { mutableStateOf(uiState.producto?.modelo ?: "") }
-    var precio by remember { mutableStateOf(uiState.producto?.precio ?: "") }
-    var stock by remember { mutableStateOf(uiState.producto?.stock?.toString() ?: "0") }
-    var descripcion by remember { mutableStateOf(uiState.producto?.descripcion ?: "") }
-    var imagenUrl by remember { mutableStateOf(uiState.producto?.imagenUrl ?: "") }
+    val producto = uiState.producto
+    var nombre by remember(producto) { mutableStateOf(producto?.nombre ?: "") }
+    var marcaId by remember(producto) { mutableStateOf(producto?.marcaId ?: 0) }
+    var categoriaId by remember(producto) { mutableStateOf(producto?.categoriaId ?: 0) }
+    var modelo by remember(producto) { mutableStateOf(producto?.modelo ?: "") }
+    var precio by remember(producto) { mutableStateOf(producto?.precio ?: "") }
+    var stock by remember(producto) { mutableStateOf(producto?.stock?.toString() ?: "0") }
+    var descripcion by remember(producto) { mutableStateOf(producto?.descripcion ?: "") }
+    var imagenUrl by remember(producto) { mutableStateOf(producto?.imagenUrl ?: "") }
     var marcaDropdown by remember { mutableStateOf(false) }
     var categoriaDropdown by remember { mutableStateOf(false) }
-
-    LaunchedEffect(uiState.producto) {
-        uiState.producto?.let { p ->
-            nombre = p.nombre
-            marcaId = p.marcaId
-            categoriaId = p.categoriaId
-            modelo = p.modelo
-            precio = p.precio
-            stock = p.stock.toString()
-            descripcion = p.descripcion
-            imagenUrl = p.imagenUrl ?: ""
-        }
-    }
 
     LaunchedEffect(uiState.success) {
         if (uiState.success) onBack()

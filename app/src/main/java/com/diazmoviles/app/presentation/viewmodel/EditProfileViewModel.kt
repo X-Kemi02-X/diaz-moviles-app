@@ -44,6 +44,42 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
+    fun guardarTodo(
+        id: Int, nombre: String, apellido: String, cedula: String,
+        email: String, telefono: String, direccion: String,
+        oldPassword: String, newPassword: String
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(saving = true, error = null, success = null)
+
+            clienteRepository.actualizarCliente(id, nombre, apellido, cedula, email, telefono, direccion)
+                .fold(
+                    onSuccess = {
+                        _uiState.value = _uiState.value.copy(saving = false, success = "Datos actualizados")
+                    },
+                    onFailure = { e ->
+                        _uiState.value = _uiState.value.copy(saving = false, error = e.message ?: "Error al guardar")
+                        return@launch
+                    }
+                )
+
+            if (oldPassword.isNotBlank() && newPassword.isNotBlank()) {
+                _uiState.value = _uiState.value.copy(saving = true)
+                try {
+                    val response = authApi.changePassword(ChangePasswordRequest(oldPassword, newPassword))
+                    if (response.isSuccessful) {
+                        _uiState.value = _uiState.value.copy(saving = false, success = "Datos y contraseña actualizados")
+                    } else {
+                        val msg = response.errorBody()?.string() ?: response.code().toString()
+                        _uiState.value = _uiState.value.copy(saving = false, error = msg)
+                    }
+                } catch (e: Exception) {
+                    _uiState.value = _uiState.value.copy(saving = false, error = e.message ?: "Error")
+                }
+            }
+        }
+    }
+
     fun guardarCliente(
         id: Int, nombre: String, apellido: String, cedula: String,
         email: String, telefono: String, direccion: String

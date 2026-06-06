@@ -87,7 +87,7 @@ class AdminProductViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSaving = true, error = null)
-            val result = if (productoId != null) {
+            val result = if (productoId != null && productoId > 0) {
                 productoRepository.actualizarProducto(
                     productoId, nombre, marcaId, categoriaId, modelo, precio, stock, descripcion, imagenUrl
                 )

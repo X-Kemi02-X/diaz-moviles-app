@@ -25,6 +25,9 @@ data class AdminUiState(
     val selectedTab: Int = 0,
     val isLoadingProductos: Boolean = false,
     val productos: List<Producto> = emptyList(),
+    val currentPage: Int = 1,
+    val hasMorePages: Boolean = false,
+    val totalCount: Int = 0,
     val searchProductos: String = "",
     val isLoadingMarcas: Boolean = false,
     val marcas: List<MarcaDto> = emptyList(),
@@ -53,6 +56,8 @@ class AdminViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AdminUiState())
     val uiState: StateFlow<AdminUiState> = _uiState.asStateFlow()
 
+    private var currentSearchProductos: String? = null
+
     init { cargarTodo() }
 
     fun selectTab(index: Int) { _uiState.value = _uiState.value.copy(selectedTab = index) }
@@ -67,15 +72,42 @@ class AdminViewModel @Inject constructor(
 
     // ── Productos ──
     fun cargarProductos() {
+        val s = _uiState.value.searchProductos.ifBlank { null }
+        currentSearchProductos = s
+        cargarPagina(1)
+    }
+
+    private fun cargarPagina(page: Int) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoadingProductos = true)
-            val s = _uiState.value.searchProductos.ifBlank { null }
-            val result = productoRepository.listarProductos(search = s)
+            _uiState.value = _uiState.value.copy(
+                isLoadingProductos = true, currentPage = page
+            )
+            val result = productoRepository.listarProductos(
+                search = currentSearchProductos, page = page
+            )
             result.fold(
-                onSuccess = { pr -> _uiState.value = _uiState.value.copy(productos = pr.productos, isLoadingProductos = false) },
-                onFailure = { e -> _uiState.value = _uiState.value.copy(error = e.message, isLoadingProductos = false) }
+                onSuccess = { pr ->
+                    _uiState.value = _uiState.value.copy(
+                        productos = pr.productos, isLoadingProductos = false,
+                        hasMorePages = pr.nextPage != null, totalCount = pr.totalCount
+                    )
+                },
+                onFailure = { e ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoadingProductos = false, error = e.message
+                    )
+                }
             )
         }
+    }
+
+    fun irPaginaAnterior() {
+        val page = _uiState.value.currentPage
+        if (page > 1) cargarPagina(page - 1)
+    }
+
+    fun irPaginaSiguiente() {
+        cargarPagina(_uiState.value.currentPage + 1)
     }
 
     fun buscarProductos(q: String) {

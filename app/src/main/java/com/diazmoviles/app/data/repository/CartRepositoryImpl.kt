@@ -14,7 +14,8 @@ class CartRepositoryImpl @Inject constructor() : CartRepository {
     private val _items = MutableStateFlow<List<CartItem>>(emptyList())
     override val items: StateFlow<List<CartItem>> = _items.asStateFlow()
 
-    override val total: StateFlow<Double> = MutableStateFlow(0.0)
+    private val _total = MutableStateFlow(0.0)
+    override val total: StateFlow<Double> = _total.asStateFlow()
 
     override fun addItem(item: CartItem) {
         val current = _items.value.toMutableList()
@@ -52,9 +53,8 @@ class CartRepositoryImpl @Inject constructor() : CartRepository {
     }
 
     private fun recalculateTotal() {
-        val sum = _items.value.sumOf {
+        _total.value = _items.value.sumOf {
             (it.precio.toDoubleOrNull() ?: 0.0) * it.cantidad
         }
-        (total as MutableStateFlow).value = sum
     }
 }

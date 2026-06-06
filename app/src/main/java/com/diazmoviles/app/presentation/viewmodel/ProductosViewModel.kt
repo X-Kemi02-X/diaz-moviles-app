@@ -2,9 +2,13 @@ package com.diazmoviles.app.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.diazmoviles.app.domain.model.Categoria
+import com.diazmoviles.app.domain.model.Marca
 import com.diazmoviles.app.domain.model.Producto
 import com.diazmoviles.app.domain.repository.ProductoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +22,11 @@ data class ProductosUiState(
     val search: String = "",
     val error: String? = null,
     val hasMore: Boolean = true,
-    val totalCount: Int = 0
+    val totalCount: Int = 0,
+    val categoriaId: Int? = null,
+    val marcaId: Int? = null,
+    val marcas: List<Marca> = emptyList(),
+    val categorias: List<Categoria> = emptyList()
 )
 
 @HiltViewModel
@@ -31,17 +39,39 @@ class ProductosViewModel @Inject constructor(
 
     private var currentPage = 1
     private var currentSearch: String? = null
+    private var currentCategoriaId: Int? = null
+    private var currentMarcaId: Int? = null
+    private var searchJob: Job? = null
 
     init {
-        cargarProductos()
+        cargarMarcasYCategorias()
     }
 
-    fun cargarProductos(search: String? = null) {
-        currentPage = 1
-        currentSearch = search
+    private fun cargarMarcasYCategorias() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null, productos = emptyList())
-            val result = productoRepository.listarProductos(search = search, page = 1)
+            productoRepository.listarMarcas().onSuccess {
+                _uiState.value = _uiState.value.copy(marcas = it)
+            }
+            productoRepository.listarCategorias().onSuccess {
+                _uiState.value = _uiState.value.copy(categorias = it)
+            }
+        }
+    }
+
+    private fun aplicarFiltros() {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(300)
+            currentPage = 1
+            _uiState.value = _uiState.value.copy(
+                isLoading = true, error = null, productos = emptyList()
+            )
+            val result = productoRepository.listarProductos(
+                search = currentSearch,
+                categoria = currentCategoriaId,
+                marca = currentMarcaId,
+                page = 1
+            )
             result.fold(
                 onSuccess = { pageResult ->
                     _uiState.value = _uiState.value.copy(
@@ -49,7 +79,7 @@ class ProductosViewModel @Inject constructor(
                         productos = pageResult.productos,
                         hasMore = pageResult.nextPage != null,
                         totalCount = pageResult.totalCount,
-                        search = search ?: ""
+                        search = currentSearch ?: ""
                     )
                 },
                 onFailure = { e ->
@@ -62,12 +92,32 @@ class ProductosViewModel @Inject constructor(
         }
     }
 
+    fun setCategoriaFilter(id: Int?) {
+        currentCategoriaId = id
+        currentMarcaId = null
+        currentSearch = null
+        _uiState.value = _uiState.value.copy(
+            categoriaId = id, marcaId = null, search = ""
+        )
+        aplicarFiltros()
+    }
+
+    fun setMarcaFilter(id: Int?) {
+        currentMarcaId = id
+        aplicarFiltros()
+    }
+
     fun cargarMas() {
         if (_uiState.value.isLoadingMore || !_uiState.value.hasMore) return
         currentPage++
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoadingMore = true)
-            val result = productoRepository.listarProductos(search = currentSearch, page = currentPage)
+            val result = productoRepository.listarProductos(
+                search = currentSearch,
+                categoria = currentCategoriaId,
+                marca = currentMarcaId,
+                page = currentPage
+            )
             result.fold(
                 onSuccess = { pageResult ->
                     _uiState.value = _uiState.value.copy(
@@ -89,6 +139,8 @@ class ProductosViewModel @Inject constructor(
     }
 
     fun buscar(query: String) {
-        cargarProductos(search = query.ifBlank { null })
+        currentSearch = query.ifBlank { null }
+        _uiState.value = _uiState.value.copy(search = query)
+        aplicarFiltros()
     }
 }
