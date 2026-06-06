@@ -3,6 +3,7 @@ package com.diazmoviles.app.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diazmoviles.app.domain.repository.AuthRepository
+import com.diazmoviles.app.domain.repository.CartRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +23,8 @@ data class AuthUiState(
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val cartRepository: CartRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -58,6 +60,7 @@ class AuthViewModel @Inject constructor(
             val result = authRepository.login(username, password)
             result.fold(
                 onSuccess = { (_, user) ->
+                    cartRepository.clear()
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         isLoggedIn = true,
@@ -79,6 +82,7 @@ class AuthViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
+            cartRepository.clear()
             authRepository.logout()
             _uiState.value = AuthUiState()
         }
