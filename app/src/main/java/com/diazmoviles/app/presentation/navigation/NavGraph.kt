@@ -18,6 +18,7 @@ import com.diazmoviles.app.presentation.ui.detail.DetalleProductoScreen
 import com.diazmoviles.app.presentation.ui.home.HomeScreen
 import com.diazmoviles.app.presentation.ui.orders.OrdersScreen
 import com.diazmoviles.app.presentation.ui.products.ProductosScreen
+import com.diazmoviles.app.presentation.ui.profile.EditProfileScreen
 import com.diazmoviles.app.presentation.ui.profile.ProfileScreen
 import com.diazmoviles.app.presentation.ui.register.RegisterScreen
 import com.diazmoviles.app.presentation.viewmodel.AuthViewModel
@@ -33,6 +34,7 @@ sealed class Screen(val route: String) {
     data object Cart : Screen("carrito")
     data object Checkout : Screen("checkout")
     data object Orders : Screen("pedidos")
+    data object EditProfile : Screen("editar-perfil")
     data object Profile : Screen("perfil")
     data object Register : Screen("registrar")
     data object Admin : Screen("admin")
@@ -131,8 +133,11 @@ fun NavGraph() {
                         popUpTo(Screen.Profile.route) { inclusive = true }
                     }
                 },
-                onNavigateToRegister = { navController.navigate(Screen.Register.route) }
+                onNavigateToEditProfile = { navController.navigate(Screen.EditProfile.route) }
             )
+        }
+        composable(Screen.EditProfile.route) {
+            EditProfileScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.Admin.route) {
             AdminScreen(

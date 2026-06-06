@@ -23,7 +23,7 @@ import com.diazmoviles.app.presentation.viewmodel.ProfileViewModel
 fun ProfileScreen(
     onBack: () -> Unit,
     onNavigateToOrders: () -> Unit,
-    onNavigateToRegister: () -> Unit,
+    onNavigateToEditProfile: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -97,7 +97,7 @@ fun ProfileScreen(
                 Spacer(Modifier.height(8.dp))
 
                 OutlinedButton(
-                    onClick = onNavigateToRegister,
+                    onClick = onNavigateToEditProfile,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 ) {
