@@ -106,6 +106,13 @@ class TokenDataStore @Inject constructor(
     }
 
     suspend fun clearSession() {
-        context.dataStore.edit { it.clear() }
+        context.dataStore.edit { prefs ->
+            prefs.remove(KEY_ACCESS)
+            prefs.remove(KEY_REFRESH)
+            prefs.remove(KEY_USER_ID)
+            prefs.remove(KEY_USERNAME)
+            prefs.remove(KEY_EMAIL)
+            prefs.remove(KEY_IS_STAFF)
+        }
     }
 }
