@@ -41,12 +41,16 @@ class CheckoutViewModel @Inject constructor(
     fun buscarClienteExistente() {
         viewModelScope.launch {
             val email = authRepository.getLoggedUser()?.email ?: return@launch
-            val clientes = clienteRepository.listarClientes(search = email).getOrDefault(emptyList())
-            val cliente = clientes.firstOrNull { it.email.equals(email, ignoreCase = true) }
+            val cliente = buscarClientePorEmail(email)
             if (cliente != null) {
                 _uiState.value = _uiState.value.copy(clienteExistente = cliente)
             }
         }
+    }
+
+    private suspend fun buscarClientePorEmail(email: String): Cliente? {
+        val clientes = clienteRepository.listarClientes(search = email).getOrDefault(emptyList())
+        return clientes.firstOrNull { it.email.equals(email, ignoreCase = true) }
     }
 
     fun realizarCheckout(
@@ -58,10 +62,11 @@ class CheckoutViewModel @Inject constructor(
             _uiState.value = CheckoutUiState(isLoading = true)
 
             val result = runCatching {
-                val clienteResult = clienteRepository.crearCliente(
-                    nombre, apellido, cedula, email, telefono, direccion
-                )
-                val cliente = clienteResult.getOrElse { throw Exception("Error al registrar cliente: ${it.message}") }
+                val cliente = _uiState.value.clienteExistente
+                    ?: buscarClientePorEmail(email)
+                    ?: clienteRepository.crearCliente(
+                        nombre, apellido, cedula, email, telefono, direccion
+                    ).getOrElse { throw Exception("Error al registrar cliente: ${it.message}") }
 
                 val items = cartRepository.items.first()
 
