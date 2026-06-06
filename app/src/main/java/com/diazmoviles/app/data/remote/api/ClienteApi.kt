@@ -1,6 +1,7 @@
 package com.diazmoviles.app.data.remote.api
 
 import com.diazmoviles.app.data.remote.dto.ClienteDto
+import com.diazmoviles.app.data.remote.dto.PaginatedDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -8,6 +9,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 data class CreateClienteRequest(
     val nombre: String,
@@ -23,7 +25,9 @@ interface ClienteApi {
     suspend fun crearCliente(@Body request: CreateClienteRequest): Response<ClienteDto>
 
     @GET("clientes/")
-    suspend fun listarClientes(): Response<List<ClienteDto>>
+    suspend fun listarClientes(
+        @Query("search") search: String? = null
+    ): Response<PaginatedDto<ClienteDto>>
 
     @GET("clientes/{id}/")
     suspend fun obtenerCliente(@Path("id") id: Int): Response<ClienteDto>

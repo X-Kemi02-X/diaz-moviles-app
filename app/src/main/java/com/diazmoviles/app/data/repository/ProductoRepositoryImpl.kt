@@ -87,7 +87,7 @@ class ProductoRepositoryImpl @Inject constructor(
         return runCatching {
             val response = marcaApi.listarMarcas()
             if (response.isSuccessful) {
-                response.body()!!.map { it.toDomain() }
+                response.body()!!.results.map { it.toDomain() }
             } else {
                 throw Exception("Error al cargar marcas: ${response.code()}")
             }
@@ -98,7 +98,7 @@ class ProductoRepositoryImpl @Inject constructor(
         return runCatching {
             val response = categoriaApi.listarCategorias()
             if (response.isSuccessful) {
-                response.body()!!.map { it.toDomain() }
+                response.body()!!.results.map { it.toDomain() }
             } else {
                 throw Exception("Error al cargar categorías: ${response.code()}")
             }

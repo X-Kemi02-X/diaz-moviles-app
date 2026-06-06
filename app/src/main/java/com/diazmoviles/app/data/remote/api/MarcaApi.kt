@@ -1,6 +1,7 @@
 package com.diazmoviles.app.data.remote.api
 
 import com.diazmoviles.app.data.remote.dto.MarcaDto
+import com.diazmoviles.app.data.remote.dto.PaginatedDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -16,7 +17,7 @@ data class CreateMarcaRequest(
 
 interface MarcaApi {
     @GET("marcas/")
-    suspend fun listarMarcas(): Response<List<MarcaDto>>
+    suspend fun listarMarcas(): Response<PaginatedDto<MarcaDto>>
 
     @POST("marcas/")
     suspend fun crearMarca(@Body request: CreateMarcaRequest): Response<MarcaDto>

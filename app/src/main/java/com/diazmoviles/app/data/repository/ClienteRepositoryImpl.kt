@@ -27,11 +27,11 @@ class ClienteRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun listarClientes(): Result<List<Cliente>> {
+    override suspend fun listarClientes(search: String?): Result<List<Cliente>> {
         return runCatching {
-            val response = clienteApi.listarClientes()
+            val response = clienteApi.listarClientes(search = search)
             if (response.isSuccessful) {
-                response.body()!!.map { it.toDomain() }
+                response.body()!!.results.map { it.toDomain() }
             } else {
                 throw Exception("Error al listar clientes: ${response.code()}")
             }

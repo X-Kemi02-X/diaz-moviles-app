@@ -8,7 +8,7 @@ interface ClienteRepository {
         email: String, telefono: String, direccion: String
     ): Result<Cliente>
 
-    suspend fun listarClientes(): Result<List<Cliente>>
+    suspend fun listarClientes(search: String? = null): Result<List<Cliente>>
 
     suspend fun obtenerCliente(id: Int): Result<Cliente>
 

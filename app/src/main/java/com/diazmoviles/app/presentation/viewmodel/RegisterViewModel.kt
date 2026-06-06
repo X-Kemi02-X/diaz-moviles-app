@@ -2,8 +2,7 @@ package com.diazmoviles.app.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.diazmoviles.app.domain.model.Cliente
-import com.diazmoviles.app.domain.repository.ClienteRepository
+import com.diazmoviles.app.domain.repository.RegisterRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,33 +13,34 @@ import javax.inject.Inject
 data class RegisterUiState(
     val isLoading: Boolean = false,
     val success: Boolean = false,
-    val cliente: Cliente? = null,
     val error: String? = null
 )
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    private val clienteRepository: ClienteRepository
+    private val registerRepository: RegisterRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
     fun registrar(
+        username: String, password: String, email: String,
         nombre: String, apellido: String, cedula: String,
-        email: String, telefono: String, direccion: String
+        telefono: String, direccion: String
     ) {
         viewModelScope.launch {
             _uiState.value = RegisterUiState(isLoading = true)
-            val result = clienteRepository.crearCliente(
-                nombre, apellido, cedula, email, telefono, direccion
+            val result = registerRepository.register(
+                username, password, email,
+                nombre, apellido, cedula, telefono, direccion
             )
             result.fold(
-                onSuccess = { cliente ->
-                    _uiState.value = RegisterUiState(success = true, cliente = cliente)
+                onSuccess = {
+                    _uiState.value = RegisterUiState(success = true)
                 },
                 onFailure = { e ->
-                    _uiState.value = RegisterUiState(error = e.message ?: "Error al registrar")
+                    _uiState.value = RegisterUiState(error = e.message ?: "Error al registrarse")
                 }
             )
         }

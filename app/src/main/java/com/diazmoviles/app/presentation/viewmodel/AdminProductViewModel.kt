@@ -42,7 +42,8 @@ class AdminProductViewModel @Inject constructor(
 
     private fun cargarDatosIniciales() {
         viewModelScope.launch {
-            _uiState.value = AdminProductUiState(isLoading = true, isEditing = productoId != null)
+            val esEdicion = productoId != null && productoId > 0
+            _uiState.value = AdminProductUiState(isLoading = true, isEditing = esEdicion)
 
             val marcasResult = productoRepository.listarMarcas()
             val categoriasResult = productoRepository.listarCategorias()
@@ -50,8 +51,8 @@ class AdminProductViewModel @Inject constructor(
             val marcas = marcasResult.getOrDefault(emptyList())
             val categorias = categoriasResult.getOrDefault(emptyList())
 
-            if (productoId != null) {
-                val productoResult = productoRepository.obtenerProducto(productoId)
+            if (esEdicion) {
+                val productoResult = productoRepository.obtenerProducto(productoId!!)
                 productoResult.fold(
                     onSuccess = { producto ->
                         _uiState.value = AdminProductUiState(

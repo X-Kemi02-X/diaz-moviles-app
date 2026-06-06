@@ -1,6 +1,7 @@
 package com.diazmoviles.app.data.remote.api
 
 import com.diazmoviles.app.data.remote.dto.CategoriaDto
+import com.diazmoviles.app.data.remote.dto.PaginatedDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -16,7 +17,7 @@ data class CreateCategoriaRequest(
 
 interface CategoriaApi {
     @GET("categorias/")
-    suspend fun listarCategorias(): Response<List<CategoriaDto>>
+    suspend fun listarCategorias(): Response<PaginatedDto<CategoriaDto>>
 
     @POST("categorias/")
     suspend fun crearCategoria(@Body request: CreateCategoriaRequest): Response<CategoriaDto>

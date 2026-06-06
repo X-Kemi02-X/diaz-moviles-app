@@ -42,4 +42,12 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun isLoggedIn(): Boolean {
         return tokenDataStore.getAccessToken() != null
     }
+
+    override suspend fun getLoggedUser(): LoggedUser? {
+        val userId = tokenDataStore.getUserId() ?: return null
+        val username = tokenDataStore.getUsername() ?: return null
+        val email = tokenDataStore.getEmail() ?: return null
+        val isStaff = tokenDataStore.getIsStaff()
+        return LoggedUser(userId, username, email, isStaff)
+    }
 }

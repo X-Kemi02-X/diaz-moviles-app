@@ -42,9 +42,9 @@ class VentaRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun listarVentas(page: Int?): Result<List<Venta>> {
+    override suspend fun listarVentas(page: Int?, usuarioId: Int?): Result<List<Venta>> {
         return runCatching {
-            val response = ventaApi.listarVentas(page = page)
+            val response = ventaApi.listarVentas(page = page, usuario = usuarioId)
             if (response.isSuccessful) {
                 response.body()!!.results.map { it.toDomain() }
             } else {

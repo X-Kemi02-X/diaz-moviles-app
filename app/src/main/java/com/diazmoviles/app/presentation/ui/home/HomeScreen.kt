@@ -5,12 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AdminPanelSettings
-import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.Receipt
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.ExitToApp
+import androidx.compose.material.icons.outlined.Login
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,15 +32,18 @@ fun HomeScreen(
     onNavigateToCart: () -> Unit,
     onNavigateToOrders: () -> Unit,
     onNavigateToRegister: () -> Unit,
+    onNavigateToProfile: () -> Unit,
     onNavigateToAdmin: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     onLogout: () -> Unit,
+    isLoggedIn: Boolean,
     isStaff: Boolean
 ) {
     val items = listOf(
         MenuItem("Catálogo", "Explora y descubre", Icons.Default.Inventory2, onNavigateToProductos),
         MenuItem("Carrito", "Tus productos", Icons.Default.ShoppingCart, onNavigateToCart),
         MenuItem("Pedidos", "Historial", Icons.Default.Receipt, onNavigateToOrders),
-        MenuItem("Clientes", "Registro", Icons.Default.PersonAdd, onNavigateToRegister),
+        MenuItem("Perfil", "Mi cuenta", Icons.Default.Person, onNavigateToProfile),
     )
 
     Scaffold(
@@ -77,24 +77,26 @@ fun HomeScreen(
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = "Bienvenido",
+                            text = if (isLoggedIn) "Bienvenido" else "Inicia sesión para comprar",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                         )
                     }
-                    IconButton(
-                        onClick = onLogout,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f))
-                    ) {
-                        Icon(
-                            Icons.Outlined.ExitToApp,
-                            contentDescription = "Salir",
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(20.dp)
-                        )
+                    if (isLoggedIn) {
+                        IconButton(
+                            onClick = onLogout,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f))
+                        ) {
+                            Icon(
+                                Icons.Outlined.ExitToApp,
+                                contentDescription = "Salir",
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -143,6 +145,10 @@ fun HomeScreen(
                                     Spacer(Modifier.weight(1f))
                                 }
                             }
+                        }
+
+                        if (!isLoggedIn) {
+                            LoginCard(onClick = onNavigateToLogin)
                         }
 
                         if (isStaff) {
@@ -205,6 +211,63 @@ private fun MenuCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun LoginCard(onClick: () -> Unit) {
+    OutlinedCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        border = CardDefaults.outlinedCardBorder().copy(
+            width = 1.dp
+        ),
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Login,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Iniciar Sesión",
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+                Text(
+                    text = "Accede a tu cuenta para comprar",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.Outlined.Login,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            )
         }
     }
 }

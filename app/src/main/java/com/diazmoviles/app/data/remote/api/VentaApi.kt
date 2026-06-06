@@ -20,7 +20,8 @@ interface VentaApi {
 
     @GET("ventas/")
     suspend fun listarVentas(
-        @Query("page") page: Int? = null
+        @Query("page") page: Int? = null,
+        @Query("usuario") usuario: Int? = null
     ): Response<PaginatedDto<VentaDto>>
 
     @GET("ventas/{id}/")

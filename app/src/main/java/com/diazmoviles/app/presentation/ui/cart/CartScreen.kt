@@ -25,6 +25,8 @@ import com.diazmoviles.app.presentation.viewmodel.CartViewModel
 fun CartScreen(
     onBack: () -> Unit,
     onCheckout: () -> Unit,
+    isLoggedIn: Boolean,
+    onNavigateToLogin: () -> Unit,
     viewModel: CartViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -76,11 +78,11 @@ fun CartScreen(
                             )
                         }
                         Button(
-                            onClick = onCheckout,
+                            onClick = { if (isLoggedIn) onCheckout() else onNavigateToLogin() },
                             shape = RoundedCornerShape(12.dp),
                             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                         ) {
-                            Text("Pagar ahora", style = MaterialTheme.typography.titleMedium)
+                            Text(if (isLoggedIn) "Pagar ahora" else "Inicia sesión para pagar", style = MaterialTheme.typography.titleMedium)
                         }
                     }
                 }

@@ -5,12 +5,14 @@ import com.diazmoviles.app.data.repository.CartRepositoryImpl
 import com.diazmoviles.app.data.repository.ClienteRepositoryImpl
 import com.diazmoviles.app.data.repository.ProductoRepositoryImpl
 import com.diazmoviles.app.data.repository.ProveedorRepositoryImpl
+import com.diazmoviles.app.data.repository.RegisterRepositoryImpl
 import com.diazmoviles.app.data.repository.VentaRepositoryImpl
 import com.diazmoviles.app.domain.repository.AuthRepository
 import com.diazmoviles.app.domain.repository.CartRepository
 import com.diazmoviles.app.domain.repository.ClienteRepository
 import com.diazmoviles.app.domain.repository.ProductoRepository
 import com.diazmoviles.app.domain.repository.ProveedorRepository
+import com.diazmoviles.app.domain.repository.RegisterRepository
 import com.diazmoviles.app.domain.repository.VentaRepository
 import dagger.Binds
 import dagger.Module
@@ -45,4 +47,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindProveedorRepository(impl: ProveedorRepositoryImpl): ProveedorRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRegisterRepository(impl: RegisterRepositoryImpl): RegisterRepository
 }

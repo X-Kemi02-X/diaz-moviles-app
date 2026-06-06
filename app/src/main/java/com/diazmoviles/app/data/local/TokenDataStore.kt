@@ -38,6 +38,18 @@ class TokenDataStore @Inject constructor(
         prefs[KEY_IS_STAFF] ?: false
     }
 
+    val userId: Flow<Int?> = context.dataStore.data.map { prefs ->
+        prefs[KEY_USER_ID]
+    }
+
+    val username: Flow<String?> = context.dataStore.data.map { prefs ->
+        prefs[KEY_USERNAME]
+    }
+
+    val email: Flow<String?> = context.dataStore.data.map { prefs ->
+        prefs[KEY_EMAIL]
+    }
+
     val accessToken: Flow<String?> = context.dataStore.data.map { prefs ->
         prefs[KEY_ACCESS]
     }
@@ -48,6 +60,10 @@ class TokenDataStore @Inject constructor(
 
     suspend fun getAccessToken(): String? = context.dataStore.data.first()[KEY_ACCESS]
     suspend fun getRefreshToken(): String? = context.dataStore.data.first()[KEY_REFRESH]
+    suspend fun getUserId(): Int? = context.dataStore.data.first()[KEY_USER_ID]
+    suspend fun getUsername(): String? = context.dataStore.data.first()[KEY_USERNAME]
+    suspend fun getEmail(): String? = context.dataStore.data.first()[KEY_EMAIL]
+    suspend fun getIsStaff(): Boolean = context.dataStore.data.first()[KEY_IS_STAFF] ?: false
 
     suspend fun saveTokens(access: String, refresh: String) {
         context.dataStore.edit { prefs ->

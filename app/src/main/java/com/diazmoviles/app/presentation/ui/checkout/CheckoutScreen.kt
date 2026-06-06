@@ -36,6 +36,17 @@ fun CheckoutScreen(
     var metodoPago by remember { mutableStateOf("efectivo") }
     var observacion by remember { mutableStateOf("") }
 
+    LaunchedEffect(uiState.clienteExistente) {
+        uiState.clienteExistente?.let { c ->
+            nombre = c.nombre
+            apellido = c.apellido
+            cedula = c.cedula
+            email = c.email
+            telefono = c.telefono
+            direccion = c.direccion
+        }
+    }
+
     LaunchedEffect(uiState.error) {
         uiState.error?.let { snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Long) }
     }

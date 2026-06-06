@@ -3,6 +3,7 @@ package com.diazmoviles.app.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diazmoviles.app.domain.model.Venta
+import com.diazmoviles.app.domain.repository.AuthRepository
 import com.diazmoviles.app.domain.repository.VentaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ data class OrdersUiState(
 
 @HiltViewModel
 class OrdersViewModel @Inject constructor(
-    private val ventaRepository: VentaRepository
+    private val ventaRepository: VentaRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OrdersUiState())
@@ -32,7 +34,8 @@ class OrdersViewModel @Inject constructor(
     fun cargarVentas() {
         viewModelScope.launch {
             _uiState.value = OrdersUiState(isLoading = true)
-            val result = ventaRepository.listarVentas()
+            val userId = authRepository.getLoggedUser()?.userId
+            val result = ventaRepository.listarVentas(usuarioId = userId)
             result.fold(
                 onSuccess = { ventas ->
                     _uiState.value = OrdersUiState(ventas = ventas)

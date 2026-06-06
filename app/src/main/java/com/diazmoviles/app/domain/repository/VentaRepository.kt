@@ -11,7 +11,7 @@ interface VentaRepository {
         ventaId: Int, productoId: Int, cantidad: Int, precioUnitario: String
     ): Result<Unit>
 
-    suspend fun listarVentas(page: Int? = null): Result<List<Venta>>
+    suspend fun listarVentas(page: Int? = null, usuarioId: Int? = null): Result<List<Venta>>
 
     suspend fun obtenerVenta(id: Int): Result<Venta>
 

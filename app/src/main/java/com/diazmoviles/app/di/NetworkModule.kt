@@ -8,6 +8,7 @@ import com.diazmoviles.app.data.remote.api.ClienteApi
 import com.diazmoviles.app.data.remote.api.MarcaApi
 import com.diazmoviles.app.data.remote.api.ProductoApi
 import com.diazmoviles.app.data.remote.api.ProveedorApi
+import com.diazmoviles.app.data.remote.api.RegisterApi
 import com.diazmoviles.app.data.remote.api.VentaApi
 import com.diazmoviles.app.data.remote.interceptor.BearerTokenInterceptor
 import dagger.Module
@@ -98,5 +99,11 @@ object NetworkModule {
     @Singleton
     fun provideProveedorApi(retrofit: Retrofit): ProveedorApi {
         return retrofit.create(ProveedorApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRegisterApi(retrofit: Retrofit): RegisterApi {
+        return retrofit.create(RegisterApi::class.java)
     }
 }

@@ -13,6 +13,9 @@ import javax.inject.Inject
 data class AuthUiState(
     val isLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
+    val userId: Int? = null,
+    val username: String? = null,
+    val email: String? = null,
     val isStaff: Boolean = false,
     val error: String? = null
 )
@@ -32,7 +35,20 @@ class AuthViewModel @Inject constructor(
     private fun checkSession() {
         viewModelScope.launch {
             val loggedIn = authRepository.isLoggedIn()
-            _uiState.value = _uiState.value.copy(isLoggedIn = loggedIn)
+            if (loggedIn) {
+                val user = authRepository.getLoggedUser()
+                if (user != null) {
+                    _uiState.value = AuthUiState(
+                        isLoggedIn = true,
+                        userId = user.userId,
+                        username = user.username,
+                        email = user.email,
+                        isStaff = user.isStaff
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(isLoggedIn = true)
+                }
+            }
         }
     }
 
@@ -45,6 +61,9 @@ class AuthViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         isLoggedIn = true,
+                        userId = user.userId,
+                        username = user.username,
+                        email = user.email,
                         isStaff = user.isStaff
                     )
                 },

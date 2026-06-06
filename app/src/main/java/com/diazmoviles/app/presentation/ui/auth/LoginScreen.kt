@@ -38,6 +38,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
+    onEnterAsGuest: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -219,40 +221,64 @@ fun LoginScreen(
                                 visible = showButton,
                                 enter = fadeIn(animationSpec = tween(400))
                             ) {
-                                Button(
-                                    onClick = {
-                                        focusManager.clearFocus()
-                                        viewModel.login(username, password)
-                                    },
-                                    enabled = !uiState.isLoading &&
-                                            username.isNotBlank() &&
-                                            password.isNotBlank(),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(52.dp),
-                                    shape = RoundedCornerShape(14.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary
-                                    ),
-                                    elevation = ButtonDefaults.buttonElevation(
-                                        defaultElevation = 4.dp
-                                    )
-                                ) {
-                                    if (uiState.isLoading) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(24.dp),
-                                            color = MaterialTheme.colorScheme.onPrimary,
-                                            strokeWidth = 2.dp
+                                Column {
+                                    Button(
+                                        onClick = {
+                                            focusManager.clearFocus()
+                                            viewModel.login(username, password)
+                                        },
+                                        enabled = !uiState.isLoading &&
+                                                username.isNotBlank() &&
+                                                password.isNotBlank(),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(52.dp),
+                                        shape = RoundedCornerShape(14.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            contentColor = MaterialTheme.colorScheme.onPrimary
+                                        ),
+                                        elevation = ButtonDefaults.buttonElevation(
+                                            defaultElevation = 4.dp
                                         )
-                                    } else {
-                                        Text(
-                                            "INGRESAR",
-                                            style = MaterialTheme.typography.titleMedium.copy(
-                                                fontWeight = FontWeight.Bold,
-                                                letterSpacing = 2.sp
+                                    ) {
+                                        if (uiState.isLoading) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(24.dp),
+                                                color = MaterialTheme.colorScheme.onPrimary,
+                                                strokeWidth = 2.dp
                                             )
-                                        )
+                                        } else {
+                                            Text(
+                                                "INGRESAR",
+                                                style = MaterialTheme.typography.titleMedium.copy(
+                                                    fontWeight = FontWeight.Bold,
+                                                    letterSpacing = 2.sp
+                                                )
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(Modifier.height(12.dp))
+
+                                    OutlinedButton(
+                                        onClick = onEnterAsGuest,
+                                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                                        shape = RoundedCornerShape(14.dp)
+                                    ) {
+                                        Text("Entrar como invitado", style = MaterialTheme.typography.titleMedium)
+                                    }
+
+                                    Spacer(Modifier.height(16.dp))
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Text("¿No tienes cuenta? ", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        TextButton(onClick = onNavigateToRegister) {
+                                            Text("Regístrate", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                                        }
                                     }
                                 }
                             }
