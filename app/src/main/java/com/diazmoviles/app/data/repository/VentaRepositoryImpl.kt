@@ -6,6 +6,8 @@ import com.diazmoviles.app.data.remote.dto.CreateVentaRequest
 import com.diazmoviles.app.data.remote.dto.DetalleVentaDto
 import com.diazmoviles.app.data.remote.dto.UpdateVentaEstadoRequest
 import com.diazmoviles.app.data.remote.dto.VentaDto
+import com.diazmoviles.app.data.remote.util.parseError
+import com.diazmoviles.app.data.remote.util.safeApiCall
 import com.diazmoviles.app.domain.model.DetalleVenta
 import com.diazmoviles.app.domain.model.Venta
 import com.diazmoviles.app.domain.repository.VentaRepository
@@ -18,14 +20,14 @@ class VentaRepositoryImpl @Inject constructor(
     override suspend fun crearVenta(
         clienteId: Int, metodoPago: String, observacion: String
     ): Result<Venta> {
-        return runCatching {
+        return safeApiCall {
             val response = ventaApi.crearVenta(
                 CreateVentaRequest(cliente = clienteId, metodoPago = metodoPago, observacion = observacion)
             )
             if (response.isSuccessful) {
                 response.body()!!.toDomain()
             } else {
-                throw Exception("Error al crear venta: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
@@ -33,55 +35,54 @@ class VentaRepositoryImpl @Inject constructor(
     override suspend fun crearDetalle(
         ventaId: Int, productoId: Int, cantidad: Int, precioUnitario: String
     ): Result<Unit> {
-        return runCatching {
+        return safeApiCall {
             val response = ventaApi.crearDetalle(
                 CreateDetalleVentaRequest(venta = ventaId, producto = productoId, cantidad = cantidad, precioUnitario = precioUnitario)
             )
             if (!response.isSuccessful) {
-                throw Exception("Error al crear detalle: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
 
     override suspend fun listarVentas(page: Int?, usuarioId: Int?): Result<List<Venta>> {
-        return runCatching {
+        return safeApiCall {
             val response = ventaApi.listarVentas(page = page, usuario = usuarioId)
             if (response.isSuccessful) {
                 response.body()!!.results.map { it.toDomain() }
             } else {
-                throw Exception("Error al cargar ventas: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
 
     override suspend fun obtenerVenta(id: Int): Result<Venta> {
-        return runCatching {
+        return safeApiCall {
             val response = ventaApi.obtenerVenta(id)
             if (response.isSuccessful) {
                 response.body()!!.toDomain()
             } else {
-                throw Exception("Error al obtener venta: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
 
     override suspend fun actualizarEstadoVenta(id: Int, estado: String): Result<Venta> {
-        return runCatching {
+        return safeApiCall {
             val response = ventaApi.actualizarEstadoVenta(id, UpdateVentaEstadoRequest(estado))
             if (response.isSuccessful) {
                 response.body()!!.toDomain()
             } else {
-                val err = response.errorBody()?.string() ?: response.code().toString()
-                throw Exception("Error al actualizar venta: $err")
+                throw Exception(response.parseError())
             }
         }
     }
 
     override suspend fun eliminarVenta(id: Int): Result<Unit> {
-        return runCatching {
+        return safeApiCall {
             val response = ventaApi.eliminarVenta(id)
             if (!response.isSuccessful) {
-                throw Exception("Error al eliminar venta: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }

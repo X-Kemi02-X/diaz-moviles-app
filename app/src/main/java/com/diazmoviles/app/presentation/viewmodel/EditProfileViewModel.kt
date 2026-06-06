@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diazmoviles.app.data.remote.api.AuthApi
 import com.diazmoviles.app.data.remote.api.ChangePasswordRequest
+import com.diazmoviles.app.data.remote.util.parseError
+import com.diazmoviles.app.data.remote.util.toUserMessage
 import com.diazmoviles.app.domain.model.Cliente
 import com.diazmoviles.app.domain.repository.AuthRepository
 import com.diazmoviles.app.domain.repository.ClienteRepository
@@ -70,11 +72,10 @@ class EditProfileViewModel @Inject constructor(
                     if (response.isSuccessful) {
                         _uiState.value = _uiState.value.copy(saving = false, success = "Datos y contraseña actualizados")
                     } else {
-                        val msg = response.errorBody()?.string() ?: response.code().toString()
-                        _uiState.value = _uiState.value.copy(saving = false, error = msg)
+                        _uiState.value = _uiState.value.copy(saving = false, error = response.parseError())
                     }
                 } catch (e: Exception) {
-                    _uiState.value = _uiState.value.copy(saving = false, error = e.message ?: "Error")
+                    _uiState.value = _uiState.value.copy(saving = false, error = e.toUserMessage())
                 }
             }
         }
@@ -106,11 +107,10 @@ class EditProfileViewModel @Inject constructor(
                 if (response.isSuccessful) {
                     _uiState.value = _uiState.value.copy(saving = false, success = "Contraseña actualizada")
                 } else {
-                    val msg = response.errorBody()?.string() ?: response.code().toString()
-                    _uiState.value = _uiState.value.copy(saving = false, error = msg)
+                    _uiState.value = _uiState.value.copy(saving = false, error = response.parseError())
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(saving = false, error = e.message ?: "Error")
+                _uiState.value = _uiState.value.copy(saving = false, error = e.toUserMessage())
             }
         }
     }

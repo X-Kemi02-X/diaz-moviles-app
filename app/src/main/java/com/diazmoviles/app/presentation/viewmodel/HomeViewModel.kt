@@ -11,13 +11,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class HomeUiState(
+    val categorias: List<Categoria> = emptyList(),
+    val isLoading: Boolean = true,
+    val error: String? = null
+)
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val productoRepository: ProductoRepository
 ) : ViewModel() {
 
-    private val _categorias = MutableStateFlow<List<Categoria>>(emptyList())
-    val categorias: StateFlow<List<Categoria>> = _categorias.asStateFlow()
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
         cargarCategorias()
@@ -25,9 +31,15 @@ class HomeViewModel @Inject constructor(
 
     private fun cargarCategorias() {
         viewModelScope.launch {
-            productoRepository.listarCategorias().onSuccess {
-                _categorias.value = it
-            }
+            _uiState.value = HomeUiState(isLoading = true)
+            productoRepository.listarCategorias().fold(
+                onSuccess = { cats ->
+                    _uiState.value = HomeUiState(categorias = cats, isLoading = false)
+                },
+                onFailure = { e ->
+                    _uiState.value = HomeUiState(isLoading = false, error = e.message)
+                }
+            )
         }
     }
 }

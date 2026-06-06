@@ -7,6 +7,8 @@ import com.diazmoviles.app.data.remote.dto.CategoriaDto
 import com.diazmoviles.app.data.remote.dto.CreateProductoRequest
 import com.diazmoviles.app.data.remote.dto.MarcaDto
 import com.diazmoviles.app.data.remote.dto.ProductoDto
+import com.diazmoviles.app.data.remote.util.parseError
+import com.diazmoviles.app.data.remote.util.safeApiCall
 import com.diazmoviles.app.domain.model.Categoria
 import com.diazmoviles.app.domain.model.Marca
 import com.diazmoviles.app.domain.model.Producto
@@ -21,7 +23,7 @@ class ProductoRepositoryImpl @Inject constructor(
 ) : ProductoRepository {
 
     override suspend fun listarProductos(search: String?, categoria: Int?, marca: Int?, page: Int?): Result<ProductosPageResult> {
-        return runCatching {
+        return safeApiCall {
             val response = productoApi.listarProductos(search = search, marca = marca, categoria = categoria, page = page)
             if (response.isSuccessful) {
                 val body = response.body()!!
@@ -35,18 +37,18 @@ class ProductoRepositoryImpl @Inject constructor(
                     nextPage = nextPage
                 )
             } else {
-                throw Exception("Error al cargar productos: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
 
     override suspend fun obtenerProducto(id: Int): Result<Producto> {
-        return runCatching {
+        return safeApiCall {
             val response = productoApi.obtenerProducto(id)
             if (response.isSuccessful) {
                 response.body()!!.toDomain()
             } else {
-                throw Exception("Error al obtener producto: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
@@ -55,14 +57,14 @@ class ProductoRepositoryImpl @Inject constructor(
         nombre: String, marca: Int, categoria: Int, modelo: String,
         precio: String, stock: Int, descripcion: String, imagenUrl: String
     ): Result<Producto> {
-        return runCatching {
+        return safeApiCall {
             val response = productoApi.crearProducto(
                 CreateProductoRequest(nombre, marca, categoria, modelo, precio, stock, descripcion, imagenUrl)
             )
             if (response.isSuccessful) {
                 response.body()!!.toDomain()
             } else {
-                throw Exception("Error al crear producto: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
@@ -71,45 +73,45 @@ class ProductoRepositoryImpl @Inject constructor(
         id: Int, nombre: String, marca: Int, categoria: Int, modelo: String,
         precio: String, stock: Int, descripcion: String, imagenUrl: String
     ): Result<Producto> {
-        return runCatching {
+        return safeApiCall {
             val response = productoApi.actualizarProducto(
                 id, CreateProductoRequest(nombre, marca, categoria, modelo, precio, stock, descripcion, imagenUrl)
             )
             if (response.isSuccessful) {
                 response.body()!!.toDomain()
             } else {
-                throw Exception("Error al actualizar producto: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
 
     override suspend fun listarMarcas(): Result<List<Marca>> {
-        return runCatching {
+        return safeApiCall {
             val response = marcaApi.listarMarcas()
             if (response.isSuccessful) {
                 response.body()!!.results.map { it.toDomain() }
             } else {
-                throw Exception("Error al cargar marcas: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
 
     override suspend fun listarCategorias(): Result<List<Categoria>> {
-        return runCatching {
+        return safeApiCall {
             val response = categoriaApi.listarCategorias()
             if (response.isSuccessful) {
                 response.body()!!.results.map { it.toDomain() }
             } else {
-                throw Exception("Error al cargar categorías: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
 
     override suspend fun eliminarProducto(id: Int): Result<Unit> {
-        return runCatching {
+        return safeApiCall {
             val response = productoApi.eliminarProducto(id)
             if (!response.isSuccessful) {
-                throw Exception("Error al eliminar producto: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }

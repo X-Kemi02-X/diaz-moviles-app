@@ -3,6 +3,8 @@ package com.diazmoviles.app.data.repository
 import com.diazmoviles.app.data.remote.api.ClienteApi
 import com.diazmoviles.app.data.remote.api.CreateClienteRequest
 import com.diazmoviles.app.data.remote.dto.ClienteDto
+import com.diazmoviles.app.data.remote.util.parseError
+import com.diazmoviles.app.data.remote.util.safeApiCall
 import com.diazmoviles.app.domain.model.Cliente
 import com.diazmoviles.app.domain.repository.ClienteRepository
 import javax.inject.Inject
@@ -15,36 +17,36 @@ class ClienteRepositoryImpl @Inject constructor(
         nombre: String, apellido: String, cedula: String,
         email: String, telefono: String, direccion: String
     ): Result<Cliente> {
-        return runCatching {
+        return safeApiCall {
             val response = clienteApi.crearCliente(
                 CreateClienteRequest(nombre, apellido, cedula, email, telefono, direccion)
             )
             if (response.isSuccessful) {
                 response.body()!!.toDomain()
             } else {
-                throw Exception("Error al registrar cliente: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
 
     override suspend fun listarClientes(search: String?): Result<List<Cliente>> {
-        return runCatching {
+        return safeApiCall {
             val response = clienteApi.listarClientes(search = search)
             if (response.isSuccessful) {
                 response.body()!!.results.map { it.toDomain() }
             } else {
-                throw Exception("Error al listar clientes: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
 
     override suspend fun obtenerCliente(id: Int): Result<Cliente> {
-        return runCatching {
+        return safeApiCall {
             val response = clienteApi.obtenerCliente(id)
             if (response.isSuccessful) {
                 response.body()!!.toDomain()
             } else {
-                throw Exception("Error al obtener cliente: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
@@ -53,23 +55,23 @@ class ClienteRepositoryImpl @Inject constructor(
         id: Int, nombre: String, apellido: String, cedula: String,
         email: String, telefono: String, direccion: String
     ): Result<Cliente> {
-        return runCatching {
+        return safeApiCall {
             val response = clienteApi.actualizarCliente(
                 id, CreateClienteRequest(nombre, apellido, cedula, email, telefono, direccion)
             )
             if (response.isSuccessful) {
                 response.body()!!.toDomain()
             } else {
-                throw Exception("Error al actualizar cliente: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }
 
     override suspend fun eliminarCliente(id: Int): Result<Unit> {
-        return runCatching {
+        return safeApiCall {
             val response = clienteApi.eliminarCliente(id)
             if (!response.isSuccessful) {
-                throw Exception("Error al eliminar cliente: ${response.code()}")
+                throw Exception(response.parseError())
             }
         }
     }

@@ -8,6 +8,8 @@ import com.diazmoviles.app.data.remote.api.CreateMarcaRequest
 import com.diazmoviles.app.data.remote.api.MarcaApi
 import com.diazmoviles.app.data.remote.dto.CategoriaDto
 import com.diazmoviles.app.data.remote.dto.MarcaDto
+import com.diazmoviles.app.data.remote.util.parseError
+import com.diazmoviles.app.data.remote.util.toUserMessage
 import com.diazmoviles.app.domain.model.Cliente
 import com.diazmoviles.app.domain.model.Producto
 import com.diazmoviles.app.domain.model.Venta
@@ -130,11 +132,15 @@ class AdminViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoadingMarcas = true)
             try {
-                val body = marcaApi.listarMarcas().body()
-                val items = body?.results ?: emptyList()
-                _uiState.value = _uiState.value.copy(marcas = items, isLoadingMarcas = false)
+                val response = marcaApi.listarMarcas()
+                if (response.isSuccessful) {
+                    val items = response.body()?.results ?: emptyList()
+                    _uiState.value = _uiState.value.copy(marcas = items, isLoadingMarcas = false)
+                } else {
+                    _uiState.value = _uiState.value.copy(error = response.parseError(), isLoadingMarcas = false)
+                }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message, isLoadingMarcas = false)
+                _uiState.value = _uiState.value.copy(error = e.toUserMessage(), isLoadingMarcas = false)
             }
         }
     }
@@ -142,17 +148,25 @@ class AdminViewModel @Inject constructor(
     fun guardarMarca(nombre: String, descripcion: String, editingId: Int? = null) {
         viewModelScope.launch {
             try {
-                if (editingId != null) marcaApi.actualizarMarca(editingId, CreateMarcaRequest(nombre, descripcion))
-                else marcaApi.crearMarca(CreateMarcaRequest(nombre, descripcion))
+                if (editingId != null) {
+                    val r = marcaApi.actualizarMarca(editingId, CreateMarcaRequest(nombre, descripcion))
+                    if (!r.isSuccessful) throw Exception(r.parseError())
+                } else {
+                    val r = marcaApi.crearMarca(CreateMarcaRequest(nombre, descripcion))
+                    if (!r.isSuccessful) throw Exception(r.parseError())
+                }
                 cargarMarcas()
-            } catch (e: Exception) { _uiState.value = _uiState.value.copy(error = e.message) }
+            } catch (e: Exception) { _uiState.value = _uiState.value.copy(error = e.toUserMessage()) }
         }
     }
 
     fun eliminarMarca(id: Int) {
         viewModelScope.launch {
-            try { marcaApi.eliminarMarca(id); cargarMarcas() }
-            catch (e: Exception) { _uiState.value = _uiState.value.copy(error = e.message) }
+            try {
+                val r = marcaApi.eliminarMarca(id)
+                if (!r.isSuccessful) throw Exception(r.parseError())
+                cargarMarcas()
+            } catch (e: Exception) { _uiState.value = _uiState.value.copy(error = e.toUserMessage()) }
         }
     }
 
@@ -163,11 +177,15 @@ class AdminViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoadingCategorias = true)
             try {
-                val body = categoriaApi.listarCategorias().body()
-                val items = body?.results ?: emptyList()
-                _uiState.value = _uiState.value.copy(categorias = items, isLoadingCategorias = false)
+                val response = categoriaApi.listarCategorias()
+                if (response.isSuccessful) {
+                    val items = response.body()?.results ?: emptyList()
+                    _uiState.value = _uiState.value.copy(categorias = items, isLoadingCategorias = false)
+                } else {
+                    _uiState.value = _uiState.value.copy(error = response.parseError(), isLoadingCategorias = false)
+                }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message, isLoadingCategorias = false)
+                _uiState.value = _uiState.value.copy(error = e.toUserMessage(), isLoadingCategorias = false)
             }
         }
     }
@@ -175,17 +193,25 @@ class AdminViewModel @Inject constructor(
     fun guardarCategoria(nombre: String, descripcion: String, editingId: Int? = null) {
         viewModelScope.launch {
             try {
-                if (editingId != null) categoriaApi.actualizarCategoria(editingId, CreateCategoriaRequest(nombre, descripcion))
-                else categoriaApi.crearCategoria(CreateCategoriaRequest(nombre, descripcion))
+                if (editingId != null) {
+                    val r = categoriaApi.actualizarCategoria(editingId, CreateCategoriaRequest(nombre, descripcion))
+                    if (!r.isSuccessful) throw Exception(r.parseError())
+                } else {
+                    val r = categoriaApi.crearCategoria(CreateCategoriaRequest(nombre, descripcion))
+                    if (!r.isSuccessful) throw Exception(r.parseError())
+                }
                 cargarCategorias()
-            } catch (e: Exception) { _uiState.value = _uiState.value.copy(error = e.message) }
+            } catch (e: Exception) { _uiState.value = _uiState.value.copy(error = e.toUserMessage()) }
         }
     }
 
     fun eliminarCategoria(id: Int) {
         viewModelScope.launch {
-            try { categoriaApi.eliminarCategoria(id); cargarCategorias() }
-            catch (e: Exception) { _uiState.value = _uiState.value.copy(error = e.message) }
+            try {
+                val r = categoriaApi.eliminarCategoria(id)
+                if (!r.isSuccessful) throw Exception(r.parseError())
+                cargarCategorias()
+            } catch (e: Exception) { _uiState.value = _uiState.value.copy(error = e.toUserMessage()) }
         }
     }
 

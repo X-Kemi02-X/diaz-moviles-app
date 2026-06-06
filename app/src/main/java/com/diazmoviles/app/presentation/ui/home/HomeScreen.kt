@@ -61,7 +61,8 @@ fun HomeScreen(
     isStaff: Boolean,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
-    val categorias by homeViewModel.categorias.collectAsState()
+    val uiState by homeViewModel.uiState.collectAsState()
+    val categorias = uiState.categorias
     val items = listOf(
         MenuItem("Catálogo", "Explora y descubre", Icons.Default.Inventory2, onNavigateToProductos),
         MenuItem("Carrito", "Tus productos", Icons.Default.ShoppingCart, onNavigateToCart),
