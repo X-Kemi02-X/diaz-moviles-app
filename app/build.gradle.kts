@@ -18,7 +18,7 @@ if (localPropertiesFile.exists()) {
 
 val apiBaseUrl = localProperties.getProperty(
     "API_BASE_URL",
-    "http://diaz-moviles.uaeftt-ute.site/api/"
+    "https://diaz-moviles.uaeftt-ute.site/api/"
 )
 
 android {
